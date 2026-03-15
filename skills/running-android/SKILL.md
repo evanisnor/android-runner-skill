@@ -18,13 +18,71 @@ For build system commands, see:
 
 Follow these steps in order. Do not skip steps. Ask the user if anything is ambiguous.
 
-### 1. Detect Build System
+### 0. Environment Setup
+
+Run these checks before touching the build system. If you already completed this step in the current session and nothing has changed, confirm the previous results and move on.
+
+#### 0a. Detect Build System
 
 Check the project root for:
-- `gradlew` or `gradlew.bat` → Gradle project, see GRADLE.md
-- `WORKSPACE`, `WORKSPACE.bazel`, or `MODULE.bazel` → Bazel project, see BAZEL.md
+- `gradlew` or `gradlew.bat` → Gradle
+- `WORKSPACE`, `WORKSPACE.bazel`, or `MODULE.bazel` → Bazel
 
-If both exist, ask the user which build system to use.
+If both exist, ask the user which to use. Record the result — the rest of the loop depends on it.
+
+#### 0b. Check Required Tools
+
+Always check:
+
+| Tool | Command |
+|------|---------|
+| `adb` | `adb version` |
+
+For Gradle projects, also check:
+
+| Tool / Variable | Command |
+|-----------------|---------|
+| Java (JDK) | `java -version` |
+| `ANDROID_HOME` or `ANDROID_SDK_ROOT` | `echo $ANDROID_HOME` |
+
+For Bazel projects, also check:
+
+| Tool / Variable | Command |
+|-----------------|---------|
+| `bazel` or `bazelisk` | `bazel version` or `bazelisk version` |
+| `ANDROID_HOME` or `ANDROID_SDK_ROOT` | `echo $ANDROID_HOME` |
+
+#### 0c. Handle Missing Tools
+
+For each missing tool or variable, report it and offer to run remediation:
+
+**`adb` missing:**
+- macOS: `brew install --cask android-platform-tools`
+- Linux: `sudo apt-get install android-tools-adb` or `sudo dnf install android-tools`
+- If Android Studio is installed, check `~/Library/Android/sdk/platform-tools/adb` (macOS) or `~/Android/Sdk/platform-tools/adb` (Linux). If found, offer to add that directory to PATH instead of installing.
+
+**Java missing:**
+- macOS: `brew install --cask temurin`
+- Linux: `sudo apt-get install openjdk-17-jdk` or `sudo dnf install java-17-openjdk-devel`
+
+**`bazel`/`bazelisk` missing:**
+- macOS: `brew install bazelisk`
+- Linux: `npm install -g @bazel/bazelisk` or direct download from the bazelisk releases page
+
+**`ANDROID_HOME`/`ANDROID_SDK_ROOT` not set:**
+1. Check the default SDK location: `~/Library/Android/sdk` (macOS) or `~/Android/Sdk` (Linux)
+2. If found: offer to `export ANDROID_HOME=<path>` and add it to the user's shell profile
+3. If not found: direct the user to install Android Studio or the Android SDK command-line tools
+
+#### 0d. Gate on Success
+
+Only proceed to Step 1 once all checks pass. If the user declines remediation or installation fails, stop and explain what is still missing and why it blocks the loop.
+
+---
+
+### 1. Detect Build System
+
+Build system was confirmed in Step 0 — use that result here.
 
 ### 2. Identify Target or Module
 

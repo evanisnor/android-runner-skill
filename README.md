@@ -34,6 +34,7 @@ The skill triggers automatically when you ask Claude to do things like:
 
 The `running-android` skill walks through a structured testing loop:
 
+0. Checks the environment — verifies `adb`, Java, and `ANDROID_HOME` are present and offers remediation if anything is missing
 1. Detects your build system (Gradle or Bazel)
 2. Identifies the build target or module
 3. Builds the APK
@@ -55,7 +56,9 @@ The `running-android` skill walks through a structured testing loop:
 
 ## Requirements
 
-- `adb` must be on your PATH (from Android SDK platform-tools)
-- For Gradle projects: a valid `gradlew` wrapper in the project root
-- For Bazel projects: `bazel` or `bazelisk` on your PATH
+- `adb` on your PATH (from Android SDK platform-tools)
+- For Gradle projects: a valid `gradlew` wrapper in the project root, Java (JDK), and `ANDROID_HOME` set
+- For Bazel projects: `bazel` or `bazelisk` on your PATH and `ANDROID_HOME` set
 - For APK inspection: `aapt` or `apkanalyzer` (from Android SDK build-tools / cmdline-tools)
+
+Claude checks these at the start of the loop (Step 0) and offers platform-specific install commands for anything missing.
