@@ -27,7 +27,7 @@ The skill triggers automatically when you ask Claude to do things like:
 ### Manual trigger
 
 ```
-/android-runner:running-android
+/running-android
 ```
 
 ## What it does
