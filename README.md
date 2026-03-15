@@ -1,6 +1,6 @@
 # android-runner-skill
 
-A Claude Code plugin for building, installing, and manually testing Android apps. Supports Gradle and Bazel build systems with ADB device management. Includes a structured human-in-the-loop testing workflow.
+A Claude Code plugin for building, installing, and testing Android apps. Supports Gradle and Bazel build systems with ADB device management. Includes a structured testing loop where Claude attempts autonomous UI validation first and hands off to the human only when stuck.
 
 ## Installation
 
@@ -39,9 +39,9 @@ The `running-android` skill walks through a structured testing loop:
 3. Builds the APK
 4. Selects a connected device or emulator
 5. Installs and launches the app
-6. Asks you what to test
-7. Waits for your feedback
-8. Optionally collects logcat or screenshots
+6. Extracts test criteria from your task description
+7. Attempts autonomous validation — dumps the UI hierarchy, reads it, taps/swipes/types, checks logcat, and reports pass or fail
+8. Falls back to you only if it gets stuck or the criteria are ambiguous
 9. Iterates — rebuilds, reinstalls, and reruns as needed
 
 ## Reference
@@ -51,6 +51,7 @@ The `running-android` skill walks through a structured testing loop:
 | `skills/running-android/GRADLE.md` | `./gradlew` commands, build variants, APK paths, test tasks |
 | `skills/running-android/BAZEL.md` | `bazel build`, `mobile-install`, target discovery |
 | `skills/running-android/ADB.md` | Device selection, install, launch, logcat, screenshots |
+| `skills/running-android/UIAUTOMATOR.md` | UI hierarchy dump, tap/swipe/text/keyevent input, bounds parsing |
 
 ## Requirements
 
