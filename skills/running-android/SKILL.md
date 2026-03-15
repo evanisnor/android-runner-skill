@@ -10,6 +10,7 @@ For build system commands, see:
 - [GRADLE.md](GRADLE.md) — `./gradlew` commands, build variants, APK paths
 - [BAZEL.md](BAZEL.md) — `bazel build`, `bazel mobile-install`, target discovery
 - [ADB.md](ADB.md) — device selection, install, launch, logcat, screenshots
+- [UIAUTOMATOR.md](UIAUTOMATOR.md) — UI hierarchy dump, input tap/swipe/text, key events
 
 ---
 
@@ -67,33 +68,51 @@ Start the app using `adb shell am start`. You will need the package name and mai
 - For Bazel: check the `android_binary` target's `manifest` attribute.
 - To extract from the APK directly: see ADB.md for `aapt` and `apkanalyzer` usage.
 
-### 7. Tell the Human What to Test
+### 7. Extract Test Criteria
 
-Do not assume what the human should verify. Explicitly ask:
+Before interacting with the app, derive criteria from the user's task description:
+- What feature or behavior is under test?
+- What UI states, elements, or text are expected to appear?
+- What actions should be taken to reach the testable state?
+- What constitutes a clear pass? A clear fail?
 
-> "The app is running on [device]. What would you like to test or verify?"
+If the task description is clear enough to answer these, proceed to step 8 autonomously. If criteria are ambiguous or the task description doesn't describe observable UI outcomes, ask the user to clarify before proceeding.
 
-Or, if the user already described a scenario, summarize the test steps and ask them to proceed.
+### 8. Autonomous Validation Loop
 
-### 8. Wait for Feedback
+Use the criteria from step 7 to drive the app. See UIAUTOMATOR.md for all commands.
 
-Wait for the human to test and report back. Do not proceed until they respond. They may:
+1. Take a screenshot (`adb exec-out screencap -p > screen.png`) and read it visually to orient.
+2. Dump the UI hierarchy (`adb shell uiautomator dump /sdcard/ui.xml` + `adb pull /sdcard/ui.xml`) and inspect element attributes for expected content.
+3. Perform input actions (tap, swipe, text entry) to navigate toward the test scenario.
+4. After each action, take a screenshot and/or re-dump the UI hierarchy to verify state progressed as expected.
+5. Check logcat for relevant output if the criteria involve behavior not visible in the UI.
+6. Evaluate against criteria:
+   - **Pass**: expected elements or text are present and no errors found — report results and go to step 10.
+   - **Fail**: unexpected state or errors found — collect screenshot and logcat, report to user, go to step 10 to iterate.
+   - **Stuck**: UI state is unclear, an action had no effect, the navigation path is unknown, or criteria can't be verified from available signals — fall through to step 9.
+
+Keep the loop to ≤ 10 actions before declaring stuck.
+
+### 9. Human Handoff (fallback)
+
+Triggered only when step 8 gets stuck or criteria were ambiguous in step 7.
+
+Report what was attempted and what was unclear, then ask:
+
+> "I wasn't able to verify [criteria] autonomously because [reason]. The app is running on [device]. Can you take over and tell me what you observe?"
+
+Wait for feedback. The human may:
 - Report a bug or unexpected behavior
-- Ask you to collect logs
-- Ask you to make a code change
-- Say the behavior looks correct
-
-### 9. Optionally Collect Logcat
-
-If the user reports an issue or asks for logs, collect logcat output. See ADB.md for filter patterns.
-
-Offer to take a screenshot if a visual issue is reported. See ADB.md for screencap usage.
+- Ask for logs or a screenshot
+- Ask for a code change
+- Confirm the behavior looks correct
 
 ### 10. Iterate
 
-Based on feedback:
+Based on results from step 8 or feedback from step 9:
 - **Bug to fix**: make the code change, rebuild, reinstall, and relaunch. Return to step 3.
-- **Want to test something else**: return to step 7.
-- **Done**: summarize what was tested and confirmed.
+- **Test something else**: return to step 7 with new criteria.
+- **Done**: summarize what was tested, what passed, what failed (if anything), and what was confirmed by autonomous vs. human verification.
 
-Before rebuilding after a code change, confirm with the user that the change looks correct.
+Before rebuilding after a code change, confirm the change with the user.
