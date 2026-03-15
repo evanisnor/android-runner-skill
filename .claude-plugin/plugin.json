@@ -1,0 +1,6 @@
+{
+  "name": "android-runner",
+  "description": "Run, install, and test Android apps using Gradle, Bazel, and ADB",
+  "version": "1.0.0",
+  "author": { "name": "evanisnor" }
+}
