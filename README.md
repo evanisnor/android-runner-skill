@@ -4,13 +4,12 @@ A Claude Code plugin for building, installing, and testing Android apps. Support
 
 ## Installation
 
-Install the plugin by pointing Claude Code at this directory:
+Add the marketplace and install the plugin:
 
 ```
-claude --plugin-dir /path/to/android-runner-skill
+/plugin add-marketplace evanisnor/evanisnor-plugins
+/plugin install evanisnor-plugins:android-runner
 ```
-
-Or add it to your Claude Code settings to load it automatically for Android projects.
 
 ## Usage
 
